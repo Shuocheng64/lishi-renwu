@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>测测你最像哪位历史人物</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: #14161f; color: #f0ead8; min-height: 100vh; }
+  #app { max-width: 480px; margin: 0 auto; padding: 28px 22px 60px; }
+  .tag { display: inline-block; font-size: 12px; letter-spacing: 4px; color: #c9a44c; border: 1px solid #c9a44c66; padding: 4px 12px; border-radius: 20px; margin-bottom: 18px; }
+  h1 { font-size: 30px; line-height: 1.4; margin-bottom: 10px; }
+  .sub { font-size: 14px; color: #9a948a; line-height: 1.8; margin-bottom: 34px; }
+  .qnum { font-size: 13px; color: #c9a44c; margin-bottom: 10px; letter-spacing: 2px; }
+  .qtext { font-size: 21px; line-height: 1.6; margin-bottom: 26px; min-height: 68px; }
+  .opt { display: block; width: 100%; text-align: left; background: #1e2230; border: 1px solid #333a4d; color: #e8e2d0; font-size: 16px; line-height: 1.5; padding: 16px 18px; border-radius: 14px; margin-bottom: 14px; cursor: pointer; transition: all .15s; font-family: inherit; }
+  .opt:active { background: #2b3147; border-color: #c9a44c; transform: scale(.98); }
+  .bar { height: 3px; background: #262b3a; border-radius: 2px; margin: 8px 0 30px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: linear-gradient(90deg,#c9a44c,#e8cf8a); width: 0; transition: width .3s; }
+  /* 结果卡 */
+  #result { text-align: center; display: none; }
+  .card { background: linear-gradient(160deg, #23283c 0%, #1a1d29 100%); border: 1px solid #c9a44c55; border-radius: 20px; padding: 34px 24px 28px; margin-top: 10px; }
+  .who-tag { font-size: 12px; letter-spacing: 3px; color: #9a948a; margin-bottom: 14px; }
+  .who { font-size: 44px; font-weight: 700; background: linear-gradient(120deg, #f4e2b0, #c9a44c); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 6px; }
+  .title { font-size: 17px; color: #e8cf8a; margin-bottom: 22px; letter-spacing: 2px; }
+  .desc { font-size: 15px; line-height: 2; color: #cfc8b8; text-align: left; margin-bottom: 20px; }
+  .traits { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 22px; }
+  .traits span { font-size: 13px; color: #e8cf8a; border: 1px solid #c9a44c55; border-radius: 16px; padding: 5px 14px; }
+  .share { font-size: 13px; color: #8a857b; line-height: 1.9; border-top: 1px dashed #3a4054; padding-top: 16px; }
+  .btn2 { display: block; width: 100%; background: none; border: 1px solid #3a4054; color: #9a948a; font-size: 14px; padding: 12px; border-radius: 12px; margin-top: 22px; cursor: pointer; font-family: inherit; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="intro">
+    <span class="tag">趣味人格测试</span>
+    <h1>你的性格，<br>历史上早有人<br>替你活过一遍</h1>
+    <p class="sub">12 道情境题，测你最像哪位历史人物。<br>李白、武则天、苏轼、诸葛亮、张骞、陶渊明——<br>约 2 分钟，秒出专属结果卡。</p>
+    <button class="opt" style="text-align:center;color:#14161f;background:linear-gradient(120deg,#f4e2b0,#c9a44c);font-weight:700;border:none;" onclick="start()">开始测试</button>
+    <p class="sub" style="margin-top:26px;font-size:12px;">约 2 分钟 · 结果可截图分享</p>
+  </div>
+  <div id="quiz" style="display:none;">
+    <div class="bar"><i id="pbar"></i></div>
+    <div class="qnum" id="qnum"></div>
+    <div class="qtext" id="qtext"></div>
+    <div id="opts"></div>
+  </div>
+  <div id="result">
+    <div class="card">
+      <div class="who-tag">你的性格底色是</div>
+      <div class="who" id="rwho"></div>
+      <div class="title" id="rtitle"></div>
+      <div class="desc" id="rdesc"></div>
+      <div class="traits" id="rtraits"></div>
+      <div class="share">长按屏幕，截图这张卡<br>发给你最好的朋友：「看看你是不是我这类人」</div>
+    </div>
+    <button class="btn2" onclick="location.reload()">再测一次</button>
+  </div>
+</div>
+<script>
+const Q = [
+  { q: "周五晚上突然空出来一整晚，你的第一反应是？", o: [
+    ["叫上朋友出去浪，人多才够劲", "A"],
+    ["正好把拖了很久的计划捡起来", "B"],
+    ["做顿好的泡壶茶，舒服最重要", "C"],
+    ["先把下周的事捋一遍再玩", "D"] ] },
+  { q: "朋友借钱不还，金额不大，你会？", o: [
+    ["提都懒得提，几十块看清一个人也值", "F"],
+    ["直接开口要，绕弯子更尴尬", "B"],
+    ["找个由头让对方自然想起来", "D"],
+    ["算了算了，下次他自己好意思", "C"] ] },
+  { q: "公司/班级要搞一场活动，你多半是？", o: [
+    ["气氛担当，有我在不会冷场", "A"],
+    ["拍板定方案的人，别磨叽", "B"],
+    ["写方案的人，但嘴上不揽功", "D"],
+    ["那个把预算和退路都算好的人", "D"] ] },
+  { q: "遇到特别不顺的一周，你会？", o: [
+    ["发疯式发泄完，明天照常嗨", "A"],
+    ["越不顺越要赢，憋着一口气", "B"],
+    ["告诉自己这是人生的一章而已", "C"],
+    ["复盘哪里出了问题，改了再走", "D"] ] },
+  { q: " 你更向往哪种生活？", o: [
+    ["仗剑走天涯，想去哪去哪", "A"],
+    ["站在要害位置，说一不二", "B"],
+    ["有一方小院，种花吃酒看云", "F"],
+    ["做成一件大事，被写进书里", "E"] ] },
+  { q: "群里争论不休没人拍板，你通常？", o: [
+    ["甩个梗把天聊活，先别吵", "A"],
+    ["直接给结论：就选 X，我来担", "B"],
+    ["把两边的理都捋清楚再表态", "D"],
+    ["看明白就好，不站队", "F"] ] },
+  { q: "一个新的机会摆在面前，但风险不小，你？", o: [
+    ["刺激，干了！大不了重来", "E"],
+    ["评估清楚赢面就押上", "B"],
+    ["想清楚最坏能不能承受，能就试", "C"],
+    ["先小步试探，别 all in", "D"] ] },
+  { q: "别人夸你，你内心真实反应是？", o: [
+    ["那必须的，我也觉得自己不错", "A"],
+    ["笑着收下，但知道自己在哪", "B"],
+    ["有点不好意思，岔开话题", "C"],
+    ["谢谢，然后想想哪里还能更好", "D"] ] },
+  { q: "你手机里最可能被翻到的东西是？", o: [
+    ["歌单和旅行收藏夹", "A"],
+    ["日程表和待办清单", "B"],
+    ["美食探店和段子", "C"],
+    ["笔记和收藏的行业分析", "E"] ] },
+  { q: "多年后同学聚会，你希望大家怎么记你？", o: [
+    ["那个最有意思、最放得开的人", "A"],
+    ["那个后来真的做成事的人", "B"],
+    ["那个活得最舒展、不内耗的人", "F"],
+    ["那个靠得住、谁都信得过的人", "D"] ] },
+  { q: "如果穿越回去只能带一样东西，你带？", o: [
+    ["一壶酒，走到哪喝到哪", "A"],
+    ["一份未来的名单，谁行谁不行", "B"],
+    ["一副好肠胃，啥年代都得吃好", "C"],
+    ["一张地图，去没人去过的地方", "E"] ] },
+  { q: "你的人生信条更接近哪句？", o: [
+    ["人生得意须尽欢", "A"],
+    ["不想当将军的兵不是好兵", "B"],
+    ["此心安处是吾乡", "C"],
+    ["谋定而后动，知止而有得", "D"] ] },
+];
+const P = {
+  A: { who: "李白", title: "浪漫自由 · 天生气氛组", traits: ["才华外露","朋友遍地","情绪自由"],
+       desc: "你是人群里最亮的那一个：来情绪快，去得也快，字典里没有「尴尬」二字。你靠热爱驱动，讨厌被安排，认定的事九头牛拉不回。你的天赋是把 ordinary 的日子过出 stories——只是记得偶尔落地，浪漫也需要柴米。" },
+  B: { who: "武则天", title: "掌局者 · 果决野心家", traits: ["目标感强","敢拍板","扛得住事"],
+       desc: "你不是在等机会，你是在筛机会。别人纠结的时候你已经在选，别人退缩的时候你已经在顶。你天生知道「位置」和「权力」怎么运转，也愿意为结果承担骂名。你唯一要防的，是把身边人都当成棋——偶尔示弱，不是输。" },
+  C: { who: "苏轼", title: "豁达生活家 · 打不倒的乐天派", traits: ["韧性极强","苦中作乐","谁都处得来"],
+       desc: "命运给你烂牌，你能把牌桌吃成火锅局。你的底色是豁达：不是没心没肺，而是跌到底之后依然觉得人间值得。你在哪都能把日子过出滋味，也总有人愿意围着你。你的人生主题不是赢，是「活透」。" },
+  D: { who: "诸葛亮", title: "谋略担当 · 长期主义者", traits: ["思虑周全","责任感重","靠得住"],
+       desc: "你是团队里那个「有他在就稳」的人。凡事先想三步，风险、退路、后手都提前备好；答应的事拼死也会办完。你不喜欢抢功，但极在意把事情做对。提醒一句：谋而后动是你的天赋，但别让完美主义拖住出手的那一刀。" },
+  E: { who: "张骞", title: "开拓者 · 好奇心引擎", traits: ["敢闯无人区","学习能力爆表","越难越兴奋"],
+       desc: "你的基因里写着「没去过」。别人看到风险，你看到「没人做过」——这让你天生适合开荒：新领域、新路子、新玩法。你被生活困住的样子最不像你。记住：你的地图上没有路，因为你走过的地方，路才开始存在。" },
+  F: { who: "陶渊明", title: "反内卷鼻祖 · 自洽隐士", traits: ["精神独立","不迎合","内心秩序稳"],
+       desc: "你很早就想明白了一件事：别人的掌声是别人的事。你不喜欢争抢，不是怂，是觉得不值得。你的日子可以做减法：少而好的东西、真而深的关系。在这个人人呐喊的时代，你安安静静把自己活成了答案。" },
+};
+let idx = 0, score = { A:0, B:0, C:0, D:0, E:0, F:0 }, avail = { A:0, B:0, C:0, D:0, E:0, F:0 };
+function start() {
+  document.getElementById("intro").style.display = "none";
+  document.getElementById("quiz").style.display = "block";
+  render();
+}
+function render() {
+  const q = Q[idx];
+  document.getElementById("pbar").style.width = (idx / Q.length * 100) + "%";
+  document.getElementById("qnum").textContent = "Q" + (idx + 1) + " / " + Q.length;
+  document.getElementById("qtext").textContent = q.q;
+  const box = document.getElementById("opts");
+  box.innerHTML = "";
+  q.o.forEach(([text, key]) => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = text;
+    b.onclick = () => {
+      score[key]++; avail[key]++;
+      idx++;
+      idx < Q.length ? render() : show();
+    };
+    box.appendChild(b);
+  });
+}
+function show() {
+  document.getElementById("quiz").style.display = "none";
+  const keys = Object.keys(score);
+  const ratio = k => score[k] / Math.max(avail[k], 1);
+  let best = keys[0];
+  for (const k of keys) if (ratio(k) > ratio(best) || (ratio(k) === ratio(best) && score[k] > score[best])) best = k;
+  const p = P[best];
+  document.getElementById("rwho").textContent = p.who;
+  document.getElementById("rtitle").textContent = p.title;
+  document.getElementById("rdesc").textContent = p.desc;
+  document.getElementById("rtraits").innerHTML = p.traits.map(t => "<span>" + t + "</span>").join("");
+  document.getElementById("result").style.display = "block";
+  document.getElementById("pbar").style.width = "100%";
+}
+</script>
+</body>
+</html>

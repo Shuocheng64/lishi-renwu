@@ -1,0 +1,1 @@
+# 部署占位：GitHub Pages 需要仓库根目录存在 .nojekyll（跳过 Jekyll 处理，保证 _ 前缀资源不被吞）
