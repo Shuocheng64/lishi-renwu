@@ -20,6 +20,7 @@
   /* 结果卡 */
   #result { text-align: center; display: none; }
   .card { background: linear-gradient(160deg, #23283c 0%, #1a1d29 100%); border: 1px solid #c9a44c55; border-radius: 20px; padding: 34px 24px 28px; margin-top: 10px; }
+  .ava { width: 150px; height: 150px; margin: 0 auto 10px; display: block; }
   .who-tag { font-size: 12px; letter-spacing: 3px; color: #9a948a; margin-bottom: 14px; }
   .who { font-size: 44px; font-weight: 700; background: linear-gradient(120deg, #f4e2b0, #c9a44c); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 6px; }
   .title { font-size: 17px; color: #e8cf8a; margin-bottom: 22px; letter-spacing: 2px; }
@@ -48,6 +49,7 @@
   <div id="result">
     <div class="card">
       <div class="who-tag">你的性格底色是</div>
+      <img class="ava" id="rava" alt="">
       <div class="who" id="rwho"></div>
       <div class="title" id="rtitle"></div>
       <div class="desc" id="rdesc"></div>
@@ -166,6 +168,7 @@ function show() {
   let best = keys[0];
   for (const k of keys) if (ratio(k) > ratio(best) || (ratio(k) === ratio(best) && score[k] > score[best])) best = k;
   const p = P[best];
+  document.getElementById("rava").src = "assets/" + best + ".png";
   document.getElementById("rwho").textContent = p.who;
   document.getElementById("rtitle").textContent = p.title;
   document.getElementById("rdesc").textContent = p.desc;
